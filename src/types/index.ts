@@ -8,7 +8,7 @@ export interface User {
 export interface AuthResponse {
   status: string;
   token: string;
-  data?: {
+  data: {
     user: User;
   };
 }
@@ -24,13 +24,9 @@ export interface RegisterCredentials {
   password: string;
 }
 
-export interface SliderItem {
+export interface OnboardingItem {
   id: string;
   title: string;
   description: string;
-  image: any; 
-}
-
-export interface OnboardingSliderProps {
-  data: SliderItem[];
+  image: any; // Using any for require images
 }

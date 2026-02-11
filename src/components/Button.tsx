@@ -8,40 +8,101 @@ import {
   TextStyle,
 } from 'react-native';
 
-interface ButtonProps {
+interface Props {
   title: string;
   onPress: () => void;
-  variant?: 'primary' | 'secondary';
+  variant?: 'primary' | 'secondary' | 'outline';
+  size?: 'small' | 'medium' | 'large';
   loading?: boolean;
+  disabled?: boolean;
   style?: ViewStyle;
   textStyle?: TextStyle;
 }
 
-const Button: React.FC<ButtonProps> = ({
+const Button: React.FC<Props> = ({
   title,
   onPress,
   variant = 'primary',
+  size = 'medium',
   loading = false,
+  disabled = false,
   style,
   textStyle,
 }) => {
+  const getVariantStyle = () => {
+    switch (variant) {
+      case 'primary':
+        return styles.primaryButton;
+      case 'secondary':
+        return styles.secondaryButton;
+      case 'outline':
+        return styles.outlineButton;
+      default:
+        return styles.primaryButton;
+    }
+  };
+
+  const getTextVariantStyle = () => {
+    switch (variant) {
+      case 'primary':
+        return styles.primaryText;
+      case 'secondary':
+        return styles.secondaryText;
+      case 'outline':
+        return styles.outlineText;
+      default:
+        return styles.primaryText;
+    }
+  };
+
+  const getSizeStyle = () => {
+    switch (size) {
+      case 'small':
+        return styles.smallButton;
+      case 'medium':
+        return styles.mediumButton;
+      case 'large':
+        return styles.largeButton;
+      default:
+        return styles.mediumButton;
+    }
+  };
+
+  const getTextSizeStyle = () => {
+    switch (size) {
+      case 'small':
+        return styles.smallText;
+      case 'medium':
+        return styles.mediumText;
+      case 'large':
+        return styles.largeText;
+      default:
+        return styles.mediumText;
+    }
+  };
+
   return (
     <TouchableOpacity
       style={[
         styles.button,
-        variant === 'primary' ? styles.primaryButton : styles.secondaryButton,
+        getVariantStyle(),
+        getSizeStyle(),
+        disabled && styles.disabledButton,
         style,
       ]}
       onPress={onPress}
-      disabled={loading}
+      disabled={disabled || loading}
+      activeOpacity={0.7}
     >
       {loading ? (
-        <ActivityIndicator color="#fff" />
+        <ActivityIndicator color="#FFFFFF" />
       ) : (
         <Text
           style={[
             styles.text,
-            variant === 'primary' ? styles.primaryText : styles.secondaryText,
+            getTextVariantStyle(),
+            getTextSizeStyle(),
+            disabled && styles.disabledText,
             textStyle,
           ]}
         >
@@ -54,30 +115,60 @@ const Button: React.FC<ButtonProps> = ({
 
 const styles = StyleSheet.create({
   button: {
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
+    borderRadius: 40,
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: 8,
   },
   primaryButton: {
     backgroundColor: '#E50914',
   },
   secondaryButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: '#333333',
+  },
+  outlineButton: {
+    backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: '#fff',
+    borderColor: '#999999',
+  },
+  disabledButton: {
+    backgroundColor: '#666666',
+    opacity: 0.6,
+  },
+  smallButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
+  mediumButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+  },
+  largeButton: {
+    paddingVertical: 16,
+    paddingHorizontal: 32,
   },
   text: {
-    fontSize: 16,
     fontWeight: '600',
   },
   primaryText: {
-    color: '#fff',
+    color: '#FFFFFF',
   },
   secondaryText: {
-    color: '#fff',
+    color: '#FFFFFF',
+  },
+  outlineText: {
+    color: '#FFFFFF',
+  },
+  disabledText: {
+    color: '#CCCCCC',
+  },
+  smallText: {
+    fontSize: 14,
+  },
+  mediumText: {
+    fontSize: 16,
+  },
+  largeText: {
+    fontSize: 18,
   },
 });
 
