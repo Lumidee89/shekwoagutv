@@ -83,15 +83,6 @@ const ProfileScreen = () => {
       ],
     },
     {
-      id: 3,
-      title: 'Parental Controls',
-      icon: '👪',
-      items: [
-        { label: 'Profile PIN', type: 'link' },
-        { label: 'Viewing Restrictions', type: 'link' },
-      ],
-    },
-    {
       id: 4,
       title: 'Support',
       icon: '❓',

@@ -16,6 +16,10 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
+type DashboardScreenNavigationProp = NativeStackNavigationProp<any, 'Dashboard'>;
 
 const { width, height } = Dimensions.get('window');
 
@@ -54,6 +58,8 @@ const DashboardScreen = () => {
   const [romanceMovies, setRomanceMovies] = useState<Movie[]>([]);
   const [sciFiMovies, setSciFiMovies] = useState<Movie[]>([]);
   const [imageErrors, setImageErrors] = useState<{[key: string]: boolean}>({});
+
+  const navigation = useNavigation<DashboardScreenNavigationProp>();
 
   // Fetch all movies on component mount
   useEffect(() => {
@@ -178,7 +184,7 @@ const DashboardScreen = () => {
       <TouchableOpacity 
         style={cardStyles[size]} 
         activeOpacity={0.8}
-        onPress={() => console.log('Movie pressed:', movie.title)}
+        onPress={() => navigation.navigate('MoviePlayer', { movieId: movie._id })}
       >
         {!hasImageError && movie.thumbnailUrl && imageUrl ? (
           <Image 
@@ -212,7 +218,7 @@ const DashboardScreen = () => {
         key={movie._id}
         style={styles.featuredCard}
         activeOpacity={0.9}
-        onPress={() => console.log('Featured movie:', movie.title)}
+        onPress={() => navigation.navigate('MoviePlayer', { movieId: movie._id })}
       >
         {!hasImageError && movie.thumbnailUrl && imageUrl ? (
           <Image 
