@@ -53,6 +53,8 @@ const MoviePlayerScreen = () => {
   const [showControls, setShowControls] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [requiresSubscription, setRequiresSubscription] = useState(false);
+  const [isDownloaded, setIsDownloaded] = useState(false);
+const [downloadLoading, setDownloadLoading] = useState(false);
   
   const videoRef = useRef<Video>(null);
   const controlsTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -61,6 +63,12 @@ const MoviePlayerScreen = () => {
   useEffect(() => {
     fetchMovieDetails();
   }, [movieId]);
+
+  useEffect(() => {
+    if (movie && !requiresSubscription) {
+      checkDownloadStatus();
+    }
+  }, [movie]);
 
   useEffect(() => {
     if (isPlaying && showControls) {
@@ -77,6 +85,46 @@ const MoviePlayerScreen = () => {
       }
     };
   }, [isPlaying, showControls]);
+
+  const checkDownloadStatus = async () => {
+    try {
+      const response = await api.get(`/downloads/check/${movieId}`);
+      setIsDownloaded(response.data.data.isDownloaded);
+    } catch (error) {
+      console.log('Error checking download status:', error);
+    }
+  };
+
+  const handleDownload = async () => {
+    if (isDownloaded) {
+      // Navigate to downloads
+      navigation.navigate('MainTabs', { screen: 'Waitlist' });
+      return;
+    }
+
+    try {
+      setDownloadLoading(true);
+      const response = await api.post(`/downloads/movie/${movieId}`);
+      
+      if (response.data.status === 'success') {
+        setIsDownloaded(true);
+        Alert.alert(
+          'Download Started',
+          `${movie?.title} has been added to your downloads.`,
+          [
+            {
+              text: 'OK',
+              onPress: () => console.log('Download confirmed')
+            }
+          ]
+        );
+      }
+    } catch (error: any) {
+      Alert.alert('Download Failed', error.response?.data?.message || 'Failed to download movie');
+    } finally {
+      setDownloadLoading(false);
+    }
+  };
 
   const fetchMovieDetails = async () => {
     try {
@@ -370,6 +418,44 @@ const MoviePlayerScreen = () => {
           ))}
         </View>
 
+        <View style={styles.actionButtons}>
+          <TouchableOpacity style={styles.playButtonLarge}>
+            <Ionicons name="play" size={20} color="#000000" />
+            <Text style={styles.playButtonLargeText}>Play</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={[
+              styles.downloadButton,
+              isDownloaded && styles.downloadedButton
+            ]}
+            onPress={handleDownload}
+            disabled={downloadLoading}
+          >
+            {downloadLoading ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <>
+                <Ionicons 
+                  name={isDownloaded ? "checkmark-done-outline" : "download-outline"} 
+                  size={20} 
+                  color={isDownloaded ? "#4CAF50" : "#FFFFFF"} 
+                />
+                <Text style={[
+                  styles.downloadButtonText,
+                  isDownloaded && styles.downloadedButtonText
+                ]}>
+                  {isDownloaded ? 'Downloaded' : 'Download'}
+                </Text>
+              </>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.shareButton}>
+            <Ionicons name="share-outline" size={20} color="#FFFFFF" />
+          </TouchableOpacity>
+        </View>
+
         <View style={styles.descriptionSection}>
           <Text style={styles.descriptionTitle}>Description</Text>
           <Text style={styles.descriptionText}>{movie.description}</Text>
@@ -636,6 +722,55 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 24,
+    marginTop: 8,
+  },
+  playButtonLarge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 10,
+    paddingHorizontal: 24,
+    borderRadius: 6,
+    marginRight: 12,
+  },
+  playButtonLargeText: {
+    color: '#000000',
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+  downloadButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(51,51,51,0.8)',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+    marginRight: 12,
+  },
+  downloadButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '500',
+    marginLeft: 8,
+  },
+  downloadedButton: {
+    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+    borderWidth: 1,
+    borderColor: '#4CAF50',
+  },
+  downloadedButtonText: {
+    color: '#4CAF50',
+  },
+  shareButton: {
+    backgroundColor: 'rgba(51,51,51,0.8)',
+    padding: 12,
+    borderRadius: 6,
   },
 });
 
